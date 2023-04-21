@@ -1,7 +1,7 @@
 # Para que possamos iniciar:
 
 
-#Devemos possuir o PostgreSQL devidamente instalado localmente caso a ingestão seja realizada no mesmo. Além de termo a necessidade de criar o banco que será alimentado pelo PySpark e terá uma tabela criada dentro de si.
+#Devemos possuir o PostgreSQL devidamente instalado localmente caso a ingestão seja realizada no mesmo. Além de termos a necessidade de criar o banco que será alimentado pelo PySpark e terá uma tabela criada dentro de si.
 
 
 1.Baixar o dataset de dados que desejamos manipular, escrever ou ler conforme o necssitarmos
