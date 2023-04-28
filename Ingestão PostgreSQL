@@ -1,41 +1,34 @@
-# Para que possamos iniciar:
+# Para iniciar:
 
+Antes de tudo, é necessário ter o PostgreSQL instalado localmente caso a ingestão seja realizada no mesmo. É preciso também criar o banco que será alimentado pelo PySpark e ter uma tabela criada dentro dele.
 
-#Devemos possuir o PostgreSQL devidamente instalado localmente caso a ingestão seja realizada no mesmo. Além de termos a necessidade de criar o banco que será alimentado pelo PySpark e terá uma tabela criada dentro de si.
+1. Baixe o dataset de dados que deseja manipular, escrever ou ler conforme a sua necessidade: https://www.datascientist.com.br/bigdata/download.zip
 
-
-1.Baixar o dataset de dados que desejamos manipular, escrever ou ler conforme o necssitarmos
-https://www.datascientist.com.br/bigdata/download.zip
-
-
-
-2.Devemos garantir a conexão do script com banco de dados, devemos baixar a versão do JDBC(conector do banco) compatível com o seu Java e PostgreSQL.
-Site oficial >> https://jdbc.postgresql.org/download/
-
-Após Baixar, presumindo que já possuo o pyspark devidamente instalado, devemos executar no terminal:
+2. Para garantir a conexão do script com o banco de dados, baixe a versão do JDBC (conector do banco) compatível com o seu Java e PostgreSQL no site oficial: https://jdbc.postgresql.org/download/. Após o download, presumindo que o PySpark esteja devidamente instalado, execute no terminal:
 pyspark --jars caminho-do-conector/conector123.jar
 
+Depois de realizar as configurações necessárias, basta importar o SparkSession. Aproveitando que o terminal já se encontra com o PySpark shell devidamente ativo, execute o seguinte código:
 
-# Após realizarmos as devidas configurações basta importar o SparkSession,aproveitando que o terminal já se encontra com o PySpark shell devidamente ativo.
-from pypsark.sql import SparkSession
+from pyspark.sql import SparkSession
 
-#Após a importação devemos criar a sessão conforme desejarmos:
-spark= SparkSession.builder.appName('NOME_DESEJADO').getOrCreate()
+# Após a importação, crie a sessão conforme desejado:
+spark = SparkSession.builder.appName('NOME_DESEJADO').getOrCreate()
 
+Agora é possível criar o DataFrame que desejamos no PySpark. Para isso, utilize o seguinte código:
 
+# dataframe = spark.read.csv('Caminho_do_arquivo/arquivo.csv')
 
-#Agora criamos o Dataframe que desejaremos criar o DataFrame no PySpark
-
-#dataframe = spark.read.csv('Caminho_do_arquivo/arquivo.csv')
-
-#Checar a criação
+# Cheque a criação:
 dataframe.show(10)
 
-#Assumindo que o banco criado foi o bancoi de dados 'portfolio',faremos a escrita do Dataframe no banco de dados através do comando:
-dataframe.write.format('jdbc').option('url','jdbc:postgresql://localhost:5432/portfolio').option('dbtable','NOME_DA_TABELA_DESEJADA'),option('user','postgres').option('password','SENHA_DO_SEU_BANCO').option('driver','org.postgresql.Driver').save()
+Assumindo que o banco criado foi o banco de dados 'portfolio', faça a escrita do DataFrame no banco de dados através do seguinte comando:
 
-#Para que possamos conferir se a ingestão foi devidamente realizada, realizamos a carga dos dados ingeridos:
-ingestao_check = spark.read.format('jdbc').option('url','jdbc:postgresql://localhost:5432/portfolio').option('dbtable','NOME_DA_TABELA_DESEJADA'),option('user','postgres').option('password','SENHA_DO_SEU_BANCO').option('driver','org.postgresql.Driver').load()
+dataframe.write.format('jdbc').option('url','jdbc:postgresql://localhost:5432/portfolio').option('dbtable','NOME_DA_TABELA_DESEJADA').option('user','postgres').option('password','SENHA_DO_SEU_BANCO').option('driver','org.postgresql.Driver').save()
 
-#Logo após lemos a carga de dados realizada anteriormente
+Para conferir se a ingestão foi devidamente realizada, realize a carga dos dados ingeridos:
+
+ingestao_check = spark.read.format('jdbc').option('url','jdbc:postgresql://localhost:5432/portfolio').option('dbtable','NOME_DA_TABELA_DESEJADA').option('user','postgres').option('password','SENHA_DO_SEU_BANCO').option('driver','org.postgresql.Driver').load()
+
+Logo após, leia a carga de dados realizada anteriormente:
+
 ingestao_check.show(10)
