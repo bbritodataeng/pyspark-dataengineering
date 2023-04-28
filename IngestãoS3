@@ -1,0 +1,44 @@
+#Ambiente:Ubuntu 22.04 | Jupyter Notebook
+
+#PySpark: Como realizar a ingestão de dados em um bucket S3 da AWS
+Para iniciar o processo de ingestão de dados em um bucket S3 da AWS utilizando o PySpark, são necessários alguns passos preliminares. É preciso fazer o download de duas bibliotecas para que o PySpark possa interagir com o S3 da AWS. Além disso, é necessário possuir as credenciais de acesso à AWS (Access Key e Secret Key) e identificar os datasets do Governo Brasileiro públicos que se deseja utilizar.
+
+#Pré-requisitos
+Bibliotecas para interação do Hadoop com os serviços da AWS: hadoop-aws-3.3.1.jar - https://hadoop.apache.org/releases.html#31+March%2C+2021%3A+Release+3.3.1+available
+AWS SDK para Java: aws-java-sdk-bundle.zip - https://sdk-for-java.amazonwebservices.com/latest/aws-java-sdk-bundle.zip
+Credenciais AWS: Access Key e Secret Key
+Datasets do Governo Brasileiro públicos: https://opendata.bcb.gov.br/dataset
+
+#Script PySpark
+A seguir, apresentamos um exemplo de código para realizar a ingestão de dados em um bucket S3 da AWS utilizando o PySpark em um ambiente Jupyter Notebook Ubuntu 22.04:
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import length
+
+spark = SparkSession.builder \
+        .appName('Read S3 CSV') \
+        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.2.0") \
+        .config('spark.jars', '/home/bebritodataeng/Downloads/hadoop-aws-3.3.1.jar,/home/bebritodataeng/Downloads/aws-java-sdk-bundle-1.11.563.jar') \
+        .getOrCreate()
+
+spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", "INSERIR A SUA ACCESS_KEY")
+spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", "INSERIR A SUA SECRET_KEY")
+
+# Leitura do arquivo e criação do Dataframe em Spark que deseja realizar a ingestão.
+# Obs: header=True admite que o arquivo csv possui cabeçalho.
+exemplo = spark.read.csv('caminho do arquivo local',header=True)
+
+# Conferência das dimensões do Dataframe:
+print([exemplo.count(), len(exemplo.columns)])
+
+# Exibir o Dataframe
+exemplo.show()
+
+# Escrever no S3:
+exemplo.write.format('orc').option('header','true').save('s3a://NOMEDO-DO-BUCKET/PASTA QUE DESEJA CRIAR')
+
+# Após a escrita, acessar o bucket para conferir o nome do arquivo
+df_datas3 = spark.read.format('orc').option('header','true').load('s3a://NOME-DO-BUCKET/PASTA/ARQUIVO.orc')
+
+# Exibir o Dataframe do S3:
+df_datas3.show()
